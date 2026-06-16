@@ -1,3 +1,8 @@
+# Variáveis do modelo numériro que podem ser modificadas pelo usuário:
+#       nx, ny, nt, lx, ly, tf, tol, it_m, 
+# Variáveis do modelo físico que podem ser modificadas pelo usuário:
+#       ho, cp, k0, k1, T1, qs, ql, qn, T0, To
+
 # Bibliotecas
 import functions
 import numpy as np
@@ -64,7 +69,8 @@ for k in range(1,nt):
 
 # Saída Gráfica
 fig, ax = plt.subplots()
-cax = ax.imshow(T_g[:,:,nt-1], cmap='coolwarm') # 'magma', 'coolwarm' ou 'viridis' são ótimas opções
+extent = np.min(x), np.max(x), np.min(y), np.max(y)
+cax = ax.imshow(T_g[:,:,nt-1], origin='lower', extent=extent,cmap='coolwarm') # 'magma', 'coolwarm' ou 'viridis' são ótimas opções
 # 3. Adicione uma barra lateral para indicar a escala de valores
 fig.colorbar(cax)
 
