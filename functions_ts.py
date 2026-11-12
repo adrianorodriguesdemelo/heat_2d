@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 # Fonte de calor
 def calcula_Q(Qf,temp,xf,yf,nxf,nyf):
@@ -28,24 +29,27 @@ def solver(Tnf,Ff,T1f,nxf,nyf,a0f,a1f,a2f,a3f,k1f,qsf,qnf,qlf,dym1f,dxm1f,tolf,i
         for j in range(1,nxf-1):
             fonte = Ff[0,j]+a2f*(np.exp(k1f*(Tnf[0,j+1]-T1f))+np.exp(k1f*(Tnf[0,j-1]-T1f)))+2.0*a3f*np.exp(k1f*(Tnf[1,j]-T1f))-2.0*qsf*dym1f
             Tnf[0,j] = resolve_newton(Tnf[0,j],T1f,fonte,k1f,a0f,a1f,tolf,it_mf)
-            # Pontos Internos
-            for i in range(1,nyf-1):
-                fonte = Ff[i,j]+a2f*(np.exp(k1f*(Tnf[i,j+1]-T1f))+np.exp(k1f*(Tnf[i,j-1]-T1f)))+a3f*(np.exp(k1f*(Tnf[i+1,j]-T1f))+np.exp(k1f*(Tnf[i-1,j]-T1f)))
-                Tnf[i,j] = resolve_newton(Tnf[i,j],T1f,fonte,k1f,a0f,a1f,tolf,it_mf)
-            # Norte
-            i = nyf-1
-            fonte = Ff[i,j]+a2f*(np.exp(k1f*(Tnf[i,j+1]-T1f))+np.exp(k1f*(Tnf[i,j-1]-T1f)))+2.0*a3f*np.exp(k1f*(Tnf[i-1,j]-T1f))-2.0*qnf*dym1f
-            Tnf[i,j] = resolve_newton(Tnf[i,j],T1f,fonte,k1f,a0f,a1f,tolf,it_mf)
         # Sudeste
         j = nxf-1
         fonte = Ff[0,j]+2.0*a2f*np.exp(k1f*(Tnf[0,j-1]-T1f))+2.0*a3f*np.exp(k1f*(Tnf[1,j]-T1f))-2.0*(qsf*dym1f+qlf*dxm1f)
         Tnf[0,j] = resolve_newton(Tnf[0,j],T1f,fonte,k1f,a0f,a1f,tolf,it_mf)
-        # Leste
+        # Pontos Internos
         for i in range(1,nyf-1):
+            for j in range(1,nxf-1):
+                fonte = Ff[i,j]+a2f*(np.exp(k1f*(Tnf[i,j+1]-T1f))+np.exp(k1f*(Tnf[i,j-1]-T1f)))+a3f*(np.exp(k1f*(Tnf[i+1,j]-T1f))+np.exp(k1f*(Tnf[i-1,j]-T1f)))
+                Tnf[i,j] = resolve_newton(Tnf[i,j],T1f,fonte,k1f,a0f,a1f,tolf,it_mf)
+            # Leste
+            j = nxf-1
             fonte = Ff[i,j]+2.0*a2f*np.exp(k1f*(Tnf[i,j-1]-T1f))+a3f*(np.exp(k1f*(Tnf[i+1,j]-T1f))+np.exp(k1f*(Tnf[i-1,j]-T1f)))-2.0*qlf*dxm1f
-            Tnf[i,j] = resolve_newton(Tnf[i,j],T1f,fonte,k1f,a0f,a1f,tolf,it_mf)                
-        # Nordeste
+            Tnf[i,j] = resolve_newton(Tnf[i,j],T1f,fonte,k1f,a0f,a1f,tolf,it_mf)           
+
+        # Norte
         i = nyf-1
+        for j in range(1,nxf-1):
+            fonte = Ff[i,j]+a2f*(np.exp(k1f*(Tnf[i,j+1]-T1f))+np.exp(k1f*(Tnf[i,j-1]-T1f)))+2.0*a3f*np.exp(k1f*(Tnf[i-1,j]-T1f))-2.0*qnf*dym1f
+            Tnf[i,j] = resolve_newton(Tnf[i,j],T1f,fonte,k1f,a0f,a1f,tolf,it_mf)     
+        # Nordeste
+        j = nxf-1
         fonte = Ff[i,j]+2.0*a2f*np.exp(k1f*(Tnf[i,j-1]-T1f))+2.0*a3f*np.exp(k1f*(Tnf[i-1,j]-T1f))-2.0*(qlf*dxm1f+qnf*dym1f)
         Tnf[i,j] = resolve_newton(Tnf[i,j],T1f,fonte,k1f,a0f,a1f,tolf,it_mf)
 

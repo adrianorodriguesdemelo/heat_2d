@@ -1,0 +1,281 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[latin1]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage[top=2cm,left=2cm,right=2cm,bottom=2cm]{geometry}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{comment}
+\usepackage{amssymb}
+\usepackage{wrapfig}
+\usepackage{tikz}
+
+\def\ds{\displaystyle}
+
+
+\pagestyle{empty}
+
+\begin{document}
+
+\section{Modelo Discreto}
+
+\subsection{Modelo contínuo}
+O problema de valor de contorno considerado é a equação não linear de condução de calor em duas dimensões, com domínio $\Omega\times(0,T] =  [0,L_x]\times [0,L_y]\times(0,T] \subset \mathbb{R}^3$:
+\begin{eqnarray}
+	\displaystyle \rho c_p\frac{\partial T}{\partial t} &=& \mathrm{div}\left( K(T)\nabla T \right) + Q, \nonumber \\
+	&=& \frac{\partial }{\partial x}\left( K(T)\frac{\partial T}{\partial x} \right) + \frac{\partial }{\partial y}\left( K(T)\frac{\partial T}{\partial y} \right) + Q, \quad (x,y,t) \in \Omega\times(0,T],
+\end{eqnarray}
+em que $Q = Q(x,y,t)$.
+
+\subsubsection{Condições de contorno}
+
+Define-se condição de Dirichlet no contorno esquerdo (oeste) e condições de Neumann nos demais contornos, conforme se evidencia na Fig. \ref{fig:fig2}:
+\begin{eqnarray*}
+T(0,y,t) &=& T_o, \\
+-\mathbf{n}\cdot \displaystyle \left( K \nabla T(x,y,t)\right) &=& q(x,y,t) = \left\{ \begin{array}{cl}
+	q_s, & \mbox{se $y = 0$},\\
+	q_l, & \mbox{se $x = L_x$},\\
+	q_n, & \mbox{se $y = L_y$},
+\end{array} \right. \\
+T(x,y,0) &=& T_0.
+\end{eqnarray*}
+\begin{figure}[htb]
+	\caption{Domínio físico e condições de contorno.}\label{fig:fig2}
+	\begin{center}
+		\begin{tikzpicture}
+			\draw[->] (-0.02,-0.02)--(-0.02,5) node[above] {$x$};
+			\draw[->] (-0.02,-0.02)--(7,-0.02); \node at (7.2,-0.02) {$y$};
+			\draw (0,0)--(0,4); \draw[dashed] (0,0)--(6,0); \draw[dashed] (6,0)--(6,4);
+			\draw[dashed] (0,4)--(6,4);
+			\node at (0.5,2) {$T_o$}; \node at (5.5,2) {$q_l$}; \node at (3,3.5) {$q_n$};
+			\node at (3,0.5) {$q_s$};
+			\node at (-0.2,-0.2) {$0$}; \node at (6,-0.3) {$L_x$}; \node at (-0.35,4) {$L_y$};
+		\end{tikzpicture}
+	\end{center}
+\end{figure}
+
+\subsection{Tratamento sobre a condução de calor}
+
+Faremos as transformações:
+\begin{eqnarray}
+f(T) &=& \displaystyle \int\left(K(T)\frac{\partial T}{\partial x}\right)dx \quad \Rightarrow \quad \frac{\partial f}{\partial x} =  K(T)\frac{\partial T}{\partial x}, \\
+g(T) &=& \displaystyle \int\left(K(T)\frac{\partial T}{\partial y}\right)dy \quad \Rightarrow \quad \frac{\partial g}{\partial y} =  K(T)\frac{\partial T}{\partial y}, 
+\end{eqnarray}
+e com isso, a EDP se torna:
+\begin{eqnarray}
+	\displaystyle \rho c_p\frac{\partial T}{\partial t} = \frac{\partial^2 f}{\partial x^2} + \frac{\partial^2 g}{\partial y^2} + Q, \quad (x,y,t) \in \Omega\times(0,T].
+\end{eqnarray}
+
+\subsection{Discretização espacial}
+
+Utilizaremos CDS central na malha apresentada na Figura \ref{fig:fig1}, de modo que a equação discreta se torna:
+\begin{eqnarray}
+	\displaystyle \rho c_p\frac{\mathrm{d}T_{j,i}(t)}{\mathrm{d}t} = \frac{f_{j+1,i}(t) - 2f_{j,i}(t) + f_{j-1,i}(t)}{\Delta x^2} + \frac{g_{j,i+1}(t) - 2g_{j,i}(t) + g_{j,i-1}(t)}{\Delta y^2} + Q_{j,i}(t),
+\end{eqnarray}
+em que $f_{j,i}(t) = f(T_{j,i}(t))$
+
+\begin{figure}[htb]
+	\caption{Malha com pontos red-black utilizada na discretização espacial.}\label{fig:fig1}
+\begin{center}
+\begin{tikzpicture}
+	\draw[dashed] (2,1)--(2,7); \draw[dashed] (4,1)--(4,7); \draw[dashed] (6,1)--(6,7);
+	\draw[dashed] (1,2)--(7,2); \draw[dashed] (1,4)--(7,4); \draw[dashed] (1,6)--(7,6);
+	\fill (2,2) circle (3pt); \fill (6,2) circle (3pt);
+	\fill (4,4) circle (3pt);
+	\fill (2,6) circle (3pt); \fill (6,6) circle (3pt);
+	\fill[red] (4,2) circle (3pt);
+	\fill[red] (2,4) circle (3pt); \fill[red] (6,4) circle (3pt);
+	\fill[red] (4,6) circle (3pt); 
+	\node at (2.9,4.5) {$(j-1,i)$}; \node at (4.5,4.5) {$(j,i)$}; \node at (6.9,4.5) {$(j+1,i)$};
+	\node at (4.85,2.5) {$(j,i-1)$}; \node at (4.85,6.5) {$(j,i+1)$};
+	\draw (2.1,1)--(3.9,1); \draw (2.1,1.1)--(2.1,0.9); \draw (3.9,1.1)--(3.9,0.9);
+	\node at (3,0.7) {$\Delta x$};
+	\draw (1,2.1)--(1,3.9); \draw (1.1,2.1)--(0.9,2.1); \draw (1.1,3.9)--(0.9,3.9);
+	\node at (0.6,3) {$\Delta y$};
+	\draw[<-] (7,1.0)--(8,1.0); \draw[->] (8,1.0)--(8,2.0);
+	\node at (7.5,0.7) {$j$}; \node at (8.25,1.5) {$i$};
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+\subsection{Discretização temporal: Jacobi \textit{waveform relaxation}}
+
+Aplicamos o método \textit{waveform relaxation}, na versão Jacobi para resolução da equação discreta:
+\begin{equation}
+	\displaystyle \rho c_p\frac{\mathrm{d}T_{j,i}^{\nu}(t)}{\mathrm{d}t} = \displaystyle\frac{f_{j+1,i}^{\nu-1}(t) - 2f_{j,i}^{\nu}(t) + f_{j-1,i}^{\nu-1}(t)}{\Delta x^2} + \displaystyle \frac{g_{j,i+1}^{\nu-1}(t) - 2g_{j,i}^{\nu}(t) + g_{j,i-1}^{\nu-1}(t)}{\Delta y^2} + Q_{j,i}^{\nu}(t).
+\end{equation}
+
+\subsubsection{Modelo totalmente discreto: método de Euler implícito}
+
+Vamos utilizar o método de Euler implícito por ser incondicionalmente estável:
+
+\begin{equation}
+	\displaystyle \frac{ \rho c_p }{\Delta t} \left( T_{j,i}^{\nu,n}-T_{j,i}^{\nu,n-1} \right) = \displaystyle\frac{f_{j+1,i}^{\nu-1,n} - 2f_{j,i}^{\nu,n} + f_{j-1,i}^{\nu-1,n}}{\Delta x^2} + 	\frac{g_{j,i+1}^{\nu-1,n} - 2g_{j,i}^{\nu,n} + g_{j,i-1}^{\nu-1,n}}{ \Delta y^2} + Q_{j,i}^{\nu,n},
+\end{equation}
+ou ainda
+\begin{multline}
+	\displaystyle \frac{\rho c_p}{\Delta t}T_{j,i}^{\nu,n} + \frac{2}{ \Delta x^2} f_{j,i}^{\nu,n} + \frac{2 }{\Delta y^2} g_{j,i}^{\nu,n} - \frac{\rho c_p}{\Delta t}T_{j,i}^{\nu,n-1} = \displaystyle\frac{ 1 }{\Delta x^2} f_{j+1,i}^{\nu-1,n} + \frac{1}{\Delta x^2} f_{j-1,i}^{\nu-1,n} + \\
+	\frac{ 1 }{\Delta y^2} g_{j,i+1}^{\nu-1,n} + \frac{ 1 }{\Delta y^2} g_{j,i-1}^{\nu-1,n} + Q_{j,i}^{\nu,n}.
+\end{multline}
+ 
+Reescrevemos os coeficientes para finalmente obter:
+
+\begin{multline}
+	\displaystyle a_pT_{j,i}^{\nu,n} + a_{pf} f_{j,i}^{\nu,n} + a_{pg} g_{j,i}^{\nu,n} - a_pT_{j,i}^{\nu,n-1} = a_{ef} f_{j+1,i}^{\nu-1,n} + a_{wf} f_{j-1,i}^{\nu-1,n} + \\
+	a_{eg} g_{j,i+1}^{\nu-1,n} + a_{wg} g_{j,i-1}^{\nu-1,n} + Q_{j,i}^{\nu,n}.
+\end{multline}
+
+
+\subsection{Discretização temporal: Gauss-Seidel \textit{red-black waveform relaxation}}
+
+Aplicamos o método \textit{waveform relaxation}, na versão Gauss-Seidel \textit{red-black} para resolução da equação discreta:
+\begin{equation}
+	\displaystyle \rho c_p\frac{\mathrm{d}T_{j,i}^{\nu}(t)}{\mathrm{d}t} = \left\{ \begin{array}{lr}
+		\displaystyle\frac{f_{j+1,i}^{\nu-1}(t) - 2f_{j,i}^{\nu}(t) + f_{j-1,i}^{\nu-1}(t)}{\Delta x^2} + & \\ 
+		\displaystyle \frac{g_{j,i+1}^{\nu-1}(t) - 2g_{j,i}^{\nu}(t) + g_{j,i-1}^{\nu-1}(t)}{\Delta y^2} + Q_{j,i}^{\nu}(t), & \mbox{se $i+j$ é par}\\
+		& \\
+		\displaystyle\frac{f_{j+1,i}^{\nu}(t) - 2f_{j,i}^{\nu}(t) + f_{j-1,i}^{\nu}(t)}{\Delta x^2} + & \\ 
+		\displaystyle \frac{g_{j,i+1}^{\nu}(t) - 2g_{j,i}^{\nu}(t) + g_{j,i-1}^{\nu}(t)}{\Delta y^2} + Q_{j,i}^{\nu}(t), & \mbox{se $i+j$ é ímpar}\\
+	\end{array}	
+	\right.
+\end{equation}
+ou, simplesmente,
+\begin{equation}
+	\rho c_p \displaystyle \frac{\mathrm{d}T_{j,i}^{\nu}}{\mathrm{d}t} = \displaystyle\frac{f_{j+1,i}^{\nu-l} - 2f_{j,i}^{\nu} + f_{j-1,i}^{\nu-l}}{ \Delta x^2} + 	\frac{g_{j,i+1}^{\nu-l} - 2g_{j,i}^{\nu} + g_{j,i-1}^{\nu-l}}{ \Delta y^2} + Q_{j,i}^{\nu}, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $i+j$ é par,} \\ 0, & \mbox{se $i+j$ é ímpar.} \end{array} \right.
+\end{equation}
+
+\subsubsection{Modelo totalmente discreto: método de Euler implícito}
+
+Vamos utilizar o método de Euler implícito por ser incondicionalmente estável:
+
+\begin{multline}
+	\displaystyle \frac{ \rho c_p }{\Delta t} \left( T_{j,i}^{\nu,n}-T_{j,i}^{\nu,n-1} \right) = \displaystyle\frac{f_{j+1,i}^{\nu-l,n} - 2f_{j,i}^{\nu,n} + f_{j-1,i}^{\nu-l,n}}{\Delta x^2} + \\
+	\frac{g_{j,i+1}^{\nu-l,n} - 2g_{j,i}^{\nu,n} + g_{j,i-1}^{\nu-l,n}}{ \Delta y^2} + Q_{j,i}^{\nu,n}, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $i+j$ é par,} \\ 0, & \mbox{se $i+j$ é ímpar.} \end{array} \right.
+\end{multline}
+ou ainda
+\begin{multline}
+	\displaystyle \frac{\rho c_p}{\Delta t}T_{j,i}^{\nu,n} + \frac{2}{ \Delta x^2} f_{j,i}^{\nu,n} + \frac{2 }{\Delta y^2} g_{j,i}^{\nu,n} - \frac{\rho c_p}{\Delta t}T_{j,i}^{\nu,n-1} = \displaystyle\frac{ 1 }{\Delta x^2} f_{j+1,i}^{\nu-l,n} + \frac{1}{\Delta x^2} f_{j-1,i}^{\nu-l,n} + \\
+	\frac{ 1 }{\Delta y^2} g_{j,i+1}^{\nu-l,n} + \frac{ 1 }{\Delta y^2} g_{j,i-1}^{\nu-l,n} + Q_{j,i}^{\nu,n}, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $i+j$ é par,} \\ 0, & \mbox{se $i+j$ é ímpar.} \end{array} \right.
+\end{multline}
+
+Reescrevemos os coeficientes para finalmente obter:
+
+\begin{multline}
+	\displaystyle a_pT_{j,i}^{\nu,n} + a_{pf} f_{j,i}^{\nu,n} + a_{pg} g_{j,i}^{\nu,n} - a_pT_{j,i}^{\nu,n-1} = a_{ef} f_{j+1,i}^{\nu-l,n} + a_{wf} f_{j-1,i}^{\nu-l,n} + \\
+	a_{eg} g_{j,i+1}^{\nu-l,n} + a_{wg} g_{j,i-1}^{\nu-l,n} + Q_{j,i}^{\nu,n}, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $i+j$ é par,} \\ 0, & \mbox{se $i+j$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\subsubsection{Condições de contorno}
+
+As condições de contorno de Neumann são discretizadas com ponto fantasma (veja Fig. \ref{fig:fig2}). Elas podem ser reescritas como $-\mathbf{n}\cdot \left(\partial_x f, \partial_y g\right) = q$. Então, sua forma discretizadas se torna:
+\begin{eqnarray*}
+	-(0,-1)\cdot \left.\left(\frac{\partial f}{\partial x} , \frac{\partial g}{\partial y} \right)\right|_{(x_j,0,t_n)} = q_s \quad \Rightarrow \quad \frac{g_{j,i+1}^n - g_{j,i-1}^n}{2\Delta y} = q_s && \stackrel{i = 0}{\Rightarrow} \quad g_{j,-1}^n =  g_{j,1}^n - 2\Delta y (q_{s})_{j}^n, \\
+	-(1,0)\cdot \left.\left(\frac{\partial f}{\partial x} , \frac{\partial g}{\partial y} \right)\right|_{(L_x,y_i,t_n)} = q_l \quad  \Rightarrow \quad -\frac{f_{j+1,i}^n - f_{j-1,i}^n}{2\Delta x} = q_l && \stackrel{j = n_x}{\Rightarrow} \quad f_{n_x+1,i}^n =  \\
+	&& \hspace{1.9cm} f_{n_x-1,i}^n - 2\Delta x (q_{l})_{i}^n, \\
+	-(0,1)\cdot \left.\left(\frac{\partial f}{\partial x} , \frac{\partial g}{\partial y} \right)\right|_{(x_j,L_y,t_n)} = q_n \quad  \Rightarrow \quad -\frac{g_{j,i+1}^n - g_{j,i-1}^n}{2\Delta y} = q_n && \stackrel{i = n_y}{\Rightarrow} \quad g_{j,n_y+1}^n =  \\
+	&& \hspace{1.9cm} g_{j,n_y-1}^n - 2\Delta y (q_{n})_{j}^n.
+\end{eqnarray*}
+
+Assim, as equações no contorno se tornam:
+\begin{multline}
+	(\mbox{sul}): \quad \displaystyle \frac{\rho c_p}{\Delta t}T_{j,0}^{\nu,n} + \frac{2}{ \Delta x^2} f_{j,0}^{\nu,n} + \frac{2 }{\Delta y^2} g_{j,0}^{\nu,n} = \frac{\rho c_p}{\Delta t}T_{j,0}^{\nu,n-1} + \displaystyle\frac{ 1 }{\Delta x^2} f_{j+1,0}^{\nu-l,n} + \frac{1}{\Delta x^2} f_{j-1,0}^{\nu-l,n} + \\
+	\frac{ 2 }{\Delta y^2} g_{j,1}^{\nu-l,n} + Q_{j,0}^{\nu,n} - \frac{ 2 }{\Delta y} (q_{s})_{j}^n, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $j$ é par,} \\ 0, & \mbox{se $j$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\begin{multline}
+	(\mbox{leste}): \quad \displaystyle \frac{\rho c_p}{\Delta t}T_{n_x,i}^{\nu,n} + \frac{2}{ \Delta x^2} f_{n_x,i}^{\nu,n} + \frac{2 }{\Delta y^2} g_{n_x,i}^{\nu,n} = \frac{\rho c_p}{\Delta t}T_{n_x,i}^{\nu,n-1} + \displaystyle\frac{ 2 }{\Delta x^2} f_{n_x-1,i}^{\nu-l,n} + \frac{ 1 }{\Delta y^2} g_{n_x,i+1}^{\nu-l,n} + \\
+	\frac{ 1 }{\Delta y^2} g_{n_x,i-1}^{\nu-l,n} + Q_{n_x,i}^{\nu,n} - \frac{ 2 }{\Delta x} (q_{l})_{i}^n, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $i+n_x$ é par,} \\ 0, & \mbox{se $i+n_x$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\begin{multline}
+	(\mbox{norte}): \quad \displaystyle \frac{\rho c_p}{\Delta t}T_{j,n_y}^{\nu,n} + \frac{2}{ \Delta x^2} f_{j,n_y}^{\nu,n} + \frac{2 }{\Delta y^2} g_{j,n_y}^{\nu,n} = \frac{\rho c_p}{\Delta t}T_{j,n_y}^{\nu,n-1} + \displaystyle\frac{ 1 }{\Delta x^2} f_{j+1,n_y}^{\nu-l,n} + \frac{1}{\Delta x^2} f_{j-1,n_y}^{\nu-l,n} + \\
+	\frac{ 2 }{\Delta y^2} g_{j,n_y-1}^{\nu-l,n} + Q_{j,n_y}^{\nu,n} - \frac{ 2 }{\Delta y} (q_{n})_{j}^n , \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $n_y+j$ é par,} \\ 0, & \mbox{se $n_y+j$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\begin{multline}
+	(\mbox{sudeste}): \quad \displaystyle \frac{\rho c_p}{\Delta t}T_{n_x,0}^{\nu,n} + \frac{2}{ \Delta x^2} f_{n_x,0}^{\nu,n} + \frac{2 }{\Delta y^2} g_{n_x,0}^{\nu,n} = \frac{\rho c_p}{\Delta t}T_{n_x,0}^{\nu,n-1} + \frac{2}{\Delta x^2} f_{n_x-1,0}^{\nu-l,n} + \frac{ 2 }{\Delta y^2} g_{n_x,1}^{\nu-l,n} + \\
+	Q_{j,0}^{\nu,n} - \frac{ 2 }{\Delta y} (q_{s})_{n_x}^n - \frac{ 2 }{\Delta x} (q_{l})_{n_x}^n, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $n_x$ é par,} \\ 0, & \mbox{se $n_x$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\begin{multline}
+	(\mbox{nordeste}): \quad \displaystyle \frac{\rho c_p}{\Delta t}T_{n_x,n_y}^{\nu,n} + \frac{2}{ \Delta x^2} f_{n_x,n_y}^{\nu,n} + \frac{2 }{\Delta y^2} g_{n_x,n_y}^{\nu,n} = \frac{\rho c_p}{\Delta t}T_{n_x,n_y}^{\nu,n-1} + \frac{2}{\Delta x^2} f_{n_x-1,n_y}^{\nu-l,n} + \frac{ 2 }{\Delta y^2} g_{n_x,n_y-1}^{\nu-l,n} + \\
+	Q_{n_x,n_y}^{\nu,n} - \frac{ 2 }{\Delta y} (q_{n})_{n_x}^n - \frac{ 2 }{\Delta x} (q_{l})_{n_x}^n, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $n_y+n_x$ é par,} \\ 0, & \mbox{se $n_y+n_x$ é ímpar.} \end{array} \right.
+\end{multline}
+
+Ou ainda,
+\begin{multline}
+	(\mbox{sul}): \quad a_pT_{j,0}^{\nu,n} + a_{pf} f_{j,0}^{\nu,n} + a_{pg} g_{j,0}^{\nu,n} = a_pT_{j,0}^{\nu,n-1} + a_{ef} f_{j+1,0}^{\nu-l,n} + a_{wf} f_{j-1,0}^{\nu-l,n} + \\
+	a_{pg} g_{j,1}^{\nu-l,n} + Q_{j,0}^{\nu,n} + a_{qs} (q_{s})_{j}^n, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $j$ é par,} \\ 0, & \mbox{se $j$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\begin{multline}
+	(\mbox{leste}): \quad a_pT_{n_x,i}^{\nu,n} + a_{pf} f_{n_x,i}^{\nu,n} + a_{pg} g_{n_x,i}^{\nu,n} = a_pT_{n_x,i}^{\nu,n-1} + a_{pf} f_{n_x-1,i}^{\nu-l,n} + a_{eg} g_{n_x,i+1}^{\nu-l,n} + \\
+	a_{wg} g_{n_x,i-1}^{\nu-l,n} + Q_{n_x,i}^{\nu,n} + a_{ql} (q_{l})_{i}^n, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $i+n_x$ é par,} \\ 0, & \mbox{se $i+n_x$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\begin{multline}
+	(\mbox{norte}): \quad a_pT_{j,n_y}^{\nu,n} + a_{pf} f_{j,n_y}^{\nu,n} + a_{pg} g_{j,n_y}^{\nu,n} = a_pT_{j,n_y}^{\nu,n-1} + a_{ef} f_{j+1,n_y}^{\nu-l,n} + a_{wf} f_{j-1,n_y}^{\nu-l,n} + \\
+	a_{pg} g_{j,n_y-1}^{\nu-l,n} + Q_{j,n_y}^{\nu,n} + a_{qn} (q_{n})_{j}^n , \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $n_y+j$ é par,} \\ 0, & \mbox{se $n_y+j$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\begin{multline}
+	(\mbox{sudeste}): \quad \displaystyle a_pT_{n_x,0}^{\nu,n} + a_{pf} f_{n_x,0}^{\nu,n} + a_{pg} g_{n_x,0}^{\nu,n} = a_pT_{n_x,0}^{\nu,n-1} + a_{pf} f_{n_x-1,0}^{\nu-l,n} + a_{pg} g_{n_x,1}^{\nu-l,n} + \\
+	Q_{j,0}^{\nu,n} + a_{qs} (q_{s})_{n_x}^n + a_{ql} (q_{l})_{n_x}^n, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $n_x$ é par,} \\ 0, & \mbox{se $n_x$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\begin{multline}
+	(\mbox{nordeste}): \quad a_pT_{n_x,n_y}^{\nu,n} + a_{pf} f_{n_x,n_y}^{\nu,n} + a_{pg} g_{n_x,n_y}^{\nu,n} = a_pT_{n_x,n_y}^{\nu,n-1} + a_{pf} f_{n_x-1,n_y}^{\nu-l,n} + a_{pg} g_{n_x,n_y-1}^{\nu-l,n} + \\
+	Q_{n_x,n_y}^{\nu,n} + a_{qn} (q_{n})_{n_x}^n + a_{ql} (q_{l})_{n_x}^n, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $n_y+n_x$ é par,} \\ 0, & \mbox{se $n_y+n_x$ é ímpar.} \end{array} \right.
+\end{multline}
+
+\subsection{Solução da equação algébrica não linear: método de Newton}
+A equação a ser revolvida é:
+\begin{equation*}
+	G(T_{j,i}^{\nu, n}) = F
+\end{equation*}
+em que
+\begin{equation}
+	G(T_{j,i}^{\nu, n}) = \displaystyle \frac{\rho c_p}{\Delta t}T_{j,i}^{\nu,n} + \frac{2}{ \Delta x^2} f (T_{j,i}^{\nu,n}) + \frac{2 }{\Delta y^2} g (T_{j,i}^{\nu,n})
+\end{equation}
+e
+\begin{multline}
+F = \frac{\rho c_p}{\Delta t}T_{j,i}^{\nu,n-1} + \displaystyle\frac{ 1 }{\Delta x^2} f_{j+1,i}^{\nu-l,n} + \frac{1}{\Delta x^2} f_{j-1,i}^{\nu-l,n} + \frac{ 1 }{\Delta y^2} g_{j,i+1}^{\nu-l,n} + \frac{ 1 }{\Delta y^2} g_{j,i-1}^{\nu-l,n} + Q_{j,i}^{\nu,n}, \\ l = \left\{\begin{array}{cl} 1, & \mbox{se $i+j$ é par,} \\ 0, & \mbox{se $i+j$ é ímpar.} \end{array} \right.
+\end{multline}
+
+No método de Newton temos:
+\begin{equation}
+	T_{j,i}^{\nu, n,k+1} = T_{j,i}^{\nu, n,k} + \displaystyle \frac{F-G(T_{j,i}^{\nu, n,k})}{G'(T_{j,i}^{\nu, n,k})}.
+\end{equation}
+
+Agora note que
+\begin{eqnarray}
+	G'(T_{j,i}^{\nu, n,k}) &=& \displaystyle \frac{\rho c_p}{\Delta t} + \frac{2}{\Delta x^2} \left.\frac{\mathrm{d} f}{\mathrm{d} T_{j,i}^{\nu, n}}\right|_{T_{j,i}^{\nu, n,k}} + \frac{2}{\Delta y^2} \left. \frac{\mathrm{d} g}{\mathrm{d} T_{j,i}^{\nu, n}} \right|_{T_{j,i}^{\nu, n,k}}, \\
+	&=& \displaystyle \frac{\rho c_p}{\Delta t} + \frac{2}{\Delta x^2} K(T_{j,i}^{\nu, n,k}) + \frac{2}{\Delta y^2} K(T_{j,i}^{\nu, n,k}), \\
+	&=& \displaystyle \frac{\rho c_p}{\Delta t} + \left( \frac{2}{\Delta x^2} + \frac{2}{\Delta y^2} \right) K(T_{j,i}^{\nu, n,k}),
+\end{eqnarray}
+ou seja,
+
+\begin{eqnarray}
+	G'(T_{j,i}^{\nu, n,k}) = a_p + \left( a_{pf} + a_{pg} \right) K(T_{j,i}^{\nu, n,k}),
+\end{eqnarray}
+
+
+\section{Caso concreto com condutividade térmica exponencial}
+
+Adotando condutividade térmica exponencial: $K(T) = \kappa_0e^{\kappa_1(T - T_0)}$, então:
+\begin{eqnarray*}
+	f(T) &=& \int\left(\kappa_0e^{\kappa_1(T - T_0)}\frac{\partial T}{\partial x}\right)dx = \frac{\kappa_0}{\kappa_1} \int \frac{\partial }{\partial x}\left(e^{\kappa_1(T - T_0)}\right)dx = \frac{\kappa_0}{\kappa_1} e^{\kappa_1(T - T_0)} = \frac{1}{\kappa_1}K(T), \\
+	g(T) &=& f(T),
+\end{eqnarray*}
+Com isso:
+\begin{multline}
+	\displaystyle \frac{\rho c_p}{\Delta t}T_{j,i}^{\nu,n} + \frac{2\kappa_0}{ \kappa_1} \left( \frac{1}{\Delta x^2} + \frac{1}{\Delta y^2}\right) \tilde{K}_{j,i}^{\nu,n} = \frac{\rho c_p}{\Delta t}T_{j,i}^{\nu,n-1} + \displaystyle\frac{ \kappa_0 }{\kappa_1 \Delta x^2} \tilde{K}_{j+1,i}^{\nu-l,n} + \frac{\kappa_0}{\kappa_1 \Delta x^2} \tilde{K}_{j-1,i}^{\nu-l,n} + \\
+	\frac{ \kappa_0 }{\kappa_1\Delta y^2} \tilde{K}_{j,i+1}^{\nu-l,n} + \frac{ \kappa_0 }{\kappa_1\Delta y^2} \tilde{K}_{j,i-1}^{\nu-l,n} + Q_{j,i}^{\nu,n}, \quad l = \left\{\begin{array}{cl} 1, & \mbox{se $i+j$ é par,} \\ 0, & \mbox{se $i+j$ é ímpar.} \end{array} \right.
+\end{multline}
+em que $\tilde{K}_{j,i} = e^{\kappa_1(T_{j,i}-T_0)}$. Os coeficientes são então:
+\begin{eqnarray*}
+	a_p = \frac{\rho c_p}{\Delta t}, \quad a_{pf} = \frac{2\kappa_0}{ \kappa_1 \Delta x^2}, \quad  a_{pg} = \frac{2\kappa_0}{\kappa_1\Delta y^2}, \quad a_{ef} = a_{wf} = \frac{ \kappa_0 }{\kappa_1 \Delta x^2} , \quad a_{eg} = a_{wg} = \frac{ \kappa_0 }{\kappa_1 \Delta y^2}
+\end{eqnarray*}
+\end{document} 

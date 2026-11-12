@@ -4,22 +4,22 @@
 #       ho, cp, k0, k1, T1, qs, ql, qn, T0, To
 
 # Bibliotecas
-import functions
+import functions_ts
 import numpy as np
 import copy as copy
 import matplotlib.pyplot as plt
 
 # Parâmetros do modelo numérico
-nx = 60         # PAR: Número de pontos na direção x
-ny = 60         # PAR: Número de pontos na direção y
-nt = 10         # Número de pontos na direção t
+nx = 33         # PAR: Número de pontos na direção x
+ny = 33         # PAR: Número de pontos na direção y
+nt = 30         # Número de pontos na direção t
 lx = 4.0        # Comprimento do retângulo (domínio)
 ly = 4.0        # Altura do retângulo (domínio)
 tf = 2.0        # Tempo (final) da simulação
-dx = lx/nx      # Tamanho do incremento na direção x
-dy = ly/ny      # Tamanho do incremento na direção y
+dx = lx/(nx-1)      # Tamanho do incremento na direção x
+dy = ly/(ny-1)      # Tamanho do incremento na direção y
 dt = tf/(nt-1)  # Tamanho do incremento na direção t
-tol = 10**(-4)  # Tolerância ao erro
+tol = 10**(-7)  # Tolerância ao erro
 it_m = 100      # Número máximo de iterações
 
 # Parametros do Modelo Físico: Condutiviade térmica - K(T) = k0*exp(k1*(T-T1))
@@ -35,8 +35,8 @@ qn = 10.0
 # Coeficientes do sistema algébrico
 dxm1 = 1.0/dx
 dym1 = 1.0/dy
-dxm2 = dxm1/dx
-dym2 = dym1/dy
+dxm2 = dxm1*dxm1
+dym2 = dym1*dym1
 a0 = rho*cp/dt
 a2 = k0*dxm2/k1
 a3 = k0*dym2/k1
@@ -61,12 +61,13 @@ y = np.linspace(0,ly,ny)
 
 # Varredura temporal
 for k in range(1,nt):
-    Q = functions.calcula_Q(Q,k*dt,x,y,nx,ny)
+    Q = functions_ts.calcula_Q(Q,k*dt,x,y,nx,ny)
     F = a0*T + Q # Fonte fixa
-    T_n = functions.solver(T_n,F,T1,nx,ny,a0,a1,a2,a3,k1,qs,qn,ql,dym1,dxm1,tol,it_m)
+    T_n = functions_ts.solver(T_n,F,T1,nx,ny,a0,a1,a2,a3,k1,qs,qn,ql,dym1,dxm1,tol,it_m)
     T = T_n.copy()
     T_g[:,:,k] = T
 
+print(T)
 # Saída Gráfica
 fig, ax = plt.subplots()
 extent = np.min(x), np.max(x), np.min(y), np.max(y)
