@@ -19,17 +19,19 @@ def parametros_fis():
 
 # Parâmetros do modelo numérico
 def parametros_num():
-    syc = 1         # ciclo: 0=SG; 1=MG
-    ni1 = 2         # n de pre-suavisacoes
-    ni2 = 2         # n de pos-suavisacoes
-    solv = 1        # Solver: 0=Gaus-Seidel; 1=Gauss-Seidel-Red-Black
-    nm = 5          # Número de malhas (>0)
-    lx = 4.0        # Comprimento do retângulo (domínio)
-    ly = 4.0        # Altura do retângulo (domínio)
-    tf = 2.0        # Tempo (final) da simulação
-    nt = 40         # Número de pontos na direção t: use 0 se nt = 2^nm+1
-    tol = 10**(-7)  # Tolerância ao erro
-    it_m = 1000      # Número máximo de iterações
+    syc = 1             # ciclo: 0=SG; 1=MG
+    ni1 = 2             # n de pre-suavisacoes
+    ni2 = 2             # n de pos-suavisacoes
+    solv = 1            # Solver: 0=Gaus-Seidel; 1=Gauss-Seidel-Red-Black
+    nm = 5              # Número de malhas (>0)
+    lx = 4.0            # Comprimento do retângulo (domínio)
+    ly = 4.0            # Altura do retângulo (domínio)
+    tf = 2.0            # Tempo (final) da simulação
+    nt = 40             # Número de pontos na direção t: use 0 se nt = 2^nm+1
+    tol_mg = 10**(-7)   # Tolerância para o MG ou SG
+    it_mg = 1000        # Número máximo de iterações para o MG ou SG
+    tol_lin = 10**(-7)  # Tolerância para o Newton
+    it_lin = 1          # Número máximo de iterações para as linearizações (Newton) 
 
     if (nt == 0): nt = 2**nm+1
     dt = tf/(nt-1)  # Tamanho do incremento na direção t
@@ -58,7 +60,7 @@ def parametros_num():
     if (syc !=0 and syc !=1):
         print('ATENÇÃO! Ciclo invalido: use 0=SG ou 1=MG!')
         sys.exit()
-    return [syc,solv,nt,nm,lx,ly,tf,dt,tol,it_m,npac,npet,npxy,npe,ni1,ni2]
+    return [syc,solv,nt,nm,lx,ly,tf,dt,tol_mg,tol_lin,it_mg,it_lin,npac,npet,npxy,npe,ni1,ni2]
 
 def coeficientes(lx,ly,npxy,nm,dt,rho,cp,k0k1):
     # Sistema algebrico

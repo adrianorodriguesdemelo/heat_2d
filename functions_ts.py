@@ -1,5 +1,4 @@
 import numpy as np
-import sys
 
 # Fonte de calor
 def calcula_Q(Qf,temp,xf,yf,nxf,nyf):

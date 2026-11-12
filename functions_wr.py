@@ -462,13 +462,13 @@ def solver_mg(solvf,ni1f,grid,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf
         Tf = solver_wr_gsrb(ni1f,grid,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tolf,it_mf)
     return Tf
 
-def multigrid(ni1f,ni2f,solvf,Tf,Taf,Qf,nmf,npxyf,npacf,ntf,npef,npetf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,dtf,rhof,cpf,k0k1f,lxf,lyf,tolf,it_mf):
+def multigrid(ni1f,ni2f,solvf,Tf,Taf,Qf,nmf,npxyf,npacf,ntf,npef,npetf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,dtf,rhof,cpf,k0k1f,lxf,lyf,tol_mg,tol_lin,it_mg,it_lin):
     R = residuo(Tf,Qf,nmf-1,npxyf,npacf,ntf,npef,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf)
     res0 = np.max(abs(R))
     it = 0; resk = res0
-    while (resk>tolf*res0 and it<it_mf):
+    while (resk>tol_mg*res0 and it<it_mg):
         for grid in range(nmf-1,0,-1):
-            Tf = solver_mg(solvf,ni1f,grid,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tolf,it_mf)
+            Tf = solver_mg(solvf,ni1f,grid,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tol_lin,it_lin)
             R = residuo(Tf,Qf,grid,npxyf,npacf,ntf,npef,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf)
             Qf = restrige_residuo(R,Qf,grid,npxyf,npacf,npef,ntf)
             Tf = restrige_solucao(Tf,grid,npxyf,npacf,npetf,ntf)
@@ -476,17 +476,17 @@ def multigrid(ni1f,ni2f,solvf,Tf,Taf,Qf,nmf,npxyf,npacf,ntf,npef,npetf,apf,aeff,
             [apf,awff,aeff,awgf,aegf,aNTf] = atualiza_coef(lxf,lyf,npxyf,grid-1,dtf,rhof,cpf,k0k1f)
             Qf = ajusta_fonte(Qf,Tf,apf,aNTf,aeff,awff,aegf,awgf,k1f,T1f,npacf,npef,npxyf,grid-1,ntf)
         # Malha grossa
-        Tf = solver_mg(solvf,10,0,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tolf,it_mf)
+        Tf = solver_mg(solvf,100,0,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tol_lin,it_lin)
         Tf[0:npacf[1]] = Tf[0:npacf[1]]-Taf[0:npacf[1]]
         Tf = prolonga(Tf,Tf,0,npxyf,npacf,npetf,ntf)
         for grid in range(1,nmf-1):
             [apf,awff,aeff,awgf,aegf,aNTf] = atualiza_coef(lxf,lyf,npxyf,grid,dtf,rhof,cpf,k0k1f)
-            Tf = solver_mg(solvf,ni2f,grid,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tolf,it_mf)
+            Tf = solver_mg(solvf,ni2f,grid,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tol_lin,it_lin)
             Tf[npacf[grid]:npacf[grid+1]] = Tf[npacf[grid]:npacf[grid+1]]-Taf[npacf[grid]:npacf[grid+1]]
             Tf = prolonga(Tf,Tf,grid,npxyf,npacf,npetf,ntf)
         grid = nmf-1
         [apf,awff,aeff,awgf,aegf,aNTf] = atualiza_coef(lxf,lyf,npxyf,grid,dtf,rhof,cpf,k0k1f)
-        Tf = solver_mg(solvf,ni2f,grid,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tolf,it_mf)
+        Tf = solver_mg(solvf,ni2f,grid,Tf,Qf,npxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tol_lin,it_lin)
         R = residuo(Tf,Qf,grid,npxyf,npacf,ntf,npef,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf)
 
         resk = np.max(abs(R))
@@ -494,22 +494,22 @@ def multigrid(ni1f,ni2f,solvf,Tf,Taf,Qf,nmf,npxyf,npacf,ntf,npef,npetf,apf,aeff,
         print(it, resk, res0, resk/res0)
     return Tf
 
-def single_grid(Tf,Qf,nxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,it_mf,tolf,met):
+def single_grid(Tf,Qf,nxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tol_mg,tol_lin,it_mg,it_lin,met):
     
     Rf = residuo(Tf,Qf,0,nxyf,npacf,ntf,npef,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf)
     res0 = np.max(abs(Rf))
     it = 0; resk = res0
     if met == 0:    # Gauss-Seidel
-        while (resk>tolf*res0 and it<it_mf):
-            Tf = solver_wr_gs(1,0,Tf,Qf,nxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tolf,it_mf)
+        while (resk>tol_mg*res0 and it<it_mg):
+            Tf = solver_wr_gs(1,0,Tf,Qf,nxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tol_lin,it_lin)
             Rf = residuo(Tf,Qf,0,nxyf,npacf,ntf,npef,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf)
             resk = np.max(abs(Rf))
             print('gs',it, resk)
             it +=1
         return Tf
     elif met == 1:   # Gauss-Seidel red-blacl
-        while (resk>tolf*res0 and it<it_mf):
-            Tf = solver_wr_gsrb(1,0,Tf,Qf,nxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tolf,it_mf)
+        while (resk>tol_mg*res0 and it<it_mg):
+            Tf = solver_wr_gsrb(1,0,Tf,Qf,nxyf,ntf,npef,npacf,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf,tol_lin,it_lin)
             Rf = residuo(Tf,Qf,0,nxyf,npacf,ntf,npef,apf,aeff,awff,aegf,awgf,k1f,T1f,aNTf)
             resk = np.max(abs(Rf))
             print('gsrb',it, resk)

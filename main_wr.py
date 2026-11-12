@@ -11,14 +11,14 @@ import copy as copy
 import matplotlib.pyplot as plt
 
 [rho,cp,k0,k1,T1,qs,ql,qn,k0k1,T0,To] = dados_wr.parametros_fis()
-[syc,solv,nt,nm,lx,ly,tf,dt,tol,it_m,npac,npet,npxy,npe,ni1,ni2] = dados_wr.parametros_num()
+[syc,solv,nt,nm,lx,ly,tf,dt,tol_mg,tol_lin,it_mg,it_lin,npac,npet,npxy,npe,ni1,ni2] = dados_wr.parametros_num()
 [ap,awf,aef,awg,aeg,apf,apg,aNT,aqs,aql,aqn] = dados_wr.coeficientes(lx,ly,npxy,nm-1,dt,rho,cp,k0k1)
 [T,Q,Ta,x,y] = dados_wr.condicoes_ini_cont(T0,To,npet,npac,npe,npxy,nt,nm,lx,ly,dt,qs,ql,qn,syc)
 
 if (syc == 1):  # multigrid
-    T = functions_wr.multigrid(ni1,ni2,solv,T,Ta,Q,nm,npxy,npac,nt,npe,npet,ap,aef,awf,aeg,awg,k1,T1,aNT,dt,rho,cp,k0k1,lx,ly,tol,it_m)
+    T = functions_wr.multigrid(ni1,ni2,solv,T,Ta,Q,nm,npxy,npac,nt,npe,npet,ap,aef,awf,aeg,awg,k1,T1,aNT,dt,rho,cp,k0k1,lx,ly,tol_mg,tol_lin,it_mg,it_lin)
 else:           # singlegrid
-    T = functions_wr.single_grid(T,Q,npxy,nt,npe,npac,ap,aef,awf,aeg,awg,k1,T1,aNT,it_m,tol,solv)
+    T = functions_wr.single_grid(T,Q,npxy,nt,npe,npac,ap,aef,awf,aeg,awg,k1,T1,aNT,tol_mg,tol_lin,it_mg,it_lin,solv)
 
 # Visualização gráfica
 n = 0
